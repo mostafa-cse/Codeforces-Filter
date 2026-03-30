@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://cf-filter.vercel.app/sitemap.xml
