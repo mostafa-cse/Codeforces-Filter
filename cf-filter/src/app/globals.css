@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #0d1117;
+  color: #c9d1d9;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* Custom Checkbox */
+.custom-checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #30363d;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.custom-checkbox:checked {
+  background: #238636;
+  border-color: #238636;
+}
+
+.custom-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Table Styles */
+.problem-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.problem-table th {
+  position: sticky;
+  top: 0;
+  background: #161b22;
+  z-index: 10;
+  border-bottom: 1px solid #30363d;
+}
+
+.problem-table td {
+  border-bottom: 1px solid #21262d;
+}
+
+.problem-table tr:hover td {
+  background: rgba(48, 54, 61, 0.3);
+}
+
+/* Rating Colors */
+.rating-newbie { color: #cccccc; }
+.rating-pupil { color: #77ff77; }
+.rating-specialist { color: #77ddbb; }
+.rating-expert { color: #aaaaff; }
+.rating-candidate-master { color: #ff88ff; }
+.rating-master { color: #ffcc88; }
+.rating-international-master { color: #ffbb55; }
+.rating-grandmaster { color: #ff7777; }
+.rating-international-grandmaster { color: #ff3333; }
+.rating-legendary-grandmaster { color: #aa0000; }
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Focus Styles */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #58a6ff;
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: rgba(88, 166, 255, 0.3);
+  color: #c9d1d9;
+}
+
+/* Line clamp */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
