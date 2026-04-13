@@ -465,8 +465,8 @@ export default function CodeforcesFilter() {
         setLoading(true);
         
         // Check cache first
-        const cachedData = localStorage.getItem('cf-problems-cache');
-        const cacheTime = localStorage.getItem('cf-problems-cache-time');
+        const cachedData = localStorage.getItem('cf-problems-cache-v2');
+        const cacheTime = localStorage.getItem('cf-problems-cache-v2-time');
         const now = Date.now();
         
         if (cachedData && cacheTime && now - parseInt(cacheTime) < 30 * 60 * 1000) {
@@ -479,14 +479,22 @@ export default function CodeforcesFilter() {
         }
         
         // Fetch fresh data
-        const [problemsRes, contestsRes] = await Promise.all([
-          axios.get('https://codeforces.com/api/problemset.problems'),
-          axios.get('https://codeforces.com/api/contest.list')
-        ]);
+      const [problemsRes, contestsRes, gymContestsRes] = await Promise.all([
+        axios.get('https://codeforces.com/api/problemset.problems'),
+        axios.get('https://codeforces.com/api/contest.list'),
+        axios.get('https://codeforces.com/api/contest.list?gym=true')
+      ]);
         
         const problemData = problemsRes.data.result.problems;
         const problemStats = problemsRes.data.result.problemStatistics;
         const contests = contestsRes.data.result;
+        const gymContests = gymContestsRes.data.result;
+        gymContests.forEach((contest: any) => {
+          contestMap.set(contest.id, {
+          name: contest.name,
+          startTimeSeconds: contest.startTimeSeconds,
+          });
+        });
         
         const statsMap = new Map();
         problemStats.forEach((stat: any) => {
@@ -517,8 +525,8 @@ export default function CodeforcesFilter() {
         );
         
         // Cache the data
-        localStorage.setItem('cf-problems-cache', JSON.stringify(enrichedProblems));
-        localStorage.setItem('cf-problems-cache-time', now.toString());
+        localStorage.setItem('cf-problems-cache-v2', JSON.stringify(enrichedProblems));
+        localStorage.setItem('cf-problems-cache-v2-time', now.toString());
         
         setProblems(enrichedProblems);
         setFilteredProblems(enrichedProblems);
