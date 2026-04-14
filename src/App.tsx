@@ -484,25 +484,26 @@ export default function CodeforcesFilter() {
         axios.get('https://codeforces.com/api/contest.list'),
         axios.get('https://codeforces.com/api/contest.list?gym=true')
       ]);
-        
-        const problemData = problemsRes.data.result.problems;
+              const problemData = problemsRes.data.result.problems;
         const problemStats = problemsRes.data.result.problemStatistics;
         const contests = contestsRes.data.result;
         const gymContests = gymContestsRes.data.result;
-        gymContests.forEach((contest: any) => {
-          contestMap.set(contest.id, {
-          name: contest.name,
-          startTimeSeconds: contest.startTimeSeconds,
-          });
-        });
         
+        // FIXED: Create maps BEFORE using them
         const statsMap = new Map();
         problemStats.forEach((stat: any) => {
           statsMap.set(`${stat.contestId}-${stat.index}`, stat.solvedCount);
         });
         
-        const contestMap = new Map();
+        const contestMap = new Map();  // ← NOW declared BEFORE use
         contests.forEach((contest: any) => {
+          contestMap.set(contest.id, {
+            name: contest.name,
+            startTimeSeconds: contest.startTimeSeconds,
+          });
+        });
+        
+        gymContests.forEach((contest: any) => {  // ← NOW used AFTER declaration
           contestMap.set(contest.id, {
             name: contest.name,
             startTimeSeconds: contest.startTimeSeconds,
