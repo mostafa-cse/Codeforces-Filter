@@ -22,10 +22,10 @@ body {
   overflow: hidden;
 }
 
-/* Custom Scrollbar - Dark Theme Matching */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -34,22 +34,11 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: #30363d;
-  border-radius: 5px;
-  border: 2px solid #0d1117;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #484f58;
-}
-
-::-webkit-scrollbar-corner {
-  background: #0d1117;
-}
-
-/* Firefox scrollbar */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #30363d #0d1117;
 }
 
 /* Custom Checkbox */
@@ -170,7 +159,7 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Scrollbar for sidebar - thinner */
+/* Scrollbar for sidebar */
 aside::-webkit-scrollbar {
   width: 6px;
 }
@@ -182,24 +171,4 @@ aside::-webkit-scrollbar-thumb {
 
 aside::-webkit-scrollbar-thumb:hover {
   background: #30363d;
-}
-
-/* Main content scrollbar styling */
-main::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-main::-webkit-scrollbar-track {
-  background: #0d1117;
-}
-
-main::-webkit-scrollbar-thumb {
-  background: #30363d;
-  border-radius: 5px;
-  border: 2px solid #0d1117;
-}
-
-main::-webkit-scrollbar-thumb:hover {
-  background: #484f58;
 }

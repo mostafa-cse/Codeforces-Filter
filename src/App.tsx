@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import axios from 'axios';
 import {
@@ -21,13 +19,8 @@ import {
   RotateCcw,
   Users,
   RefreshCw,
-  X,
-  Edit3,
-  Trash2,
-  Target,
-  Linkedin,
 } from 'lucide-react';
-import './index.css';
+import './app/globals.css';
 
 // Types
 interface Problem {
@@ -50,10 +43,6 @@ interface TrackedUser {
   submissions: Map<string, string>;
   solvedProblems: Set<string>;
   lastUpdated: number;
-}
-
-interface Quota {
-  text: string;
 }
 
 interface Filters {
@@ -86,7 +75,7 @@ const DIVISIONS = [
 
 const INDICES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
 
-const RATING_OPTIONS = [0, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500];
+const RATING_OPTIONS = [800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500];
 
 const USER_COLORS = [
   '#58a6ff', '#238636', '#d29922', '#f778ba', '#8957e5', '#3fb950', '#79c0ff'
@@ -230,7 +219,7 @@ function RangeSelect({ label, fromValue, toValue, onFromChange, onToChange, opti
         >
           <option value="">from</option>
           {options.map((opt) => (
-            <option key={opt} value={opt}>{opt === 0 ? 'Unrated (0)' : opt}</option>
+            <option key={opt} value={opt}>{opt}</option>
           ))}
         </select>
         <span className="text-gray-500 font-bold">—</span>
@@ -241,7 +230,7 @@ function RangeSelect({ label, fromValue, toValue, onFromChange, onToChange, opti
         >
           <option value="">to</option>
           {options.map((opt) => (
-            <option key={opt} value={opt}>{opt === 0 ? 'Unrated (0)' : opt}</option>
+            <option key={opt} value={opt}>{opt}</option>
           ))}
         </select>
       </div>
@@ -279,84 +268,6 @@ function AccordionSection({ title, badge, children, defaultOpen = true }: Accord
   );
 }
 
-// Quota Modal Component
-interface QuotaModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  quota: Quota | null;
-  onSave: (text: string) => void;
-  onDelete?: () => void;
-}
-
-function QuotaModal({ isOpen, onClose, quota, onSave, onDelete }: QuotaModalProps) {
-  const [text, setText] = useState('');
-
-  useEffect(() => {
-    if (isOpen) {
-      setText(quota?.text || '');
-    }
-  }, [isOpen, quota]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-[#161b22] border border-[#30363d] rounded-xl shadow-2xl max-w-md w-full p-6 animate-fade-in">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-blue-400" />
-            <h3 className="text-lg font-semibold text-white">
-              {quota?.text ? 'Edit Quota' : 'Set Quota'}
-            </h3>
-          </div>
-          <button onClick={onClose} className="p-1 hover:bg-[#21262d] rounded-lg transition-colors">
-            <X className="w-5 h-5 text-gray-400" />
-          </button>
-        </div>
-        
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Enter your quota (e.g., For C, You have to upsolve C and D both!)"
-          className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none transition-colors resize-none min-h-[100px] placeholder:text-gray-500"
-          autoFocus
-        />
-        
-        <div className="flex items-center justify-end gap-2 mt-4">
-          {quota?.text && onDelete && (
-            <button
-              onClick={onDelete}
-              className="px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-1"
-            >
-              <Trash2 className="w-4 h-4" />
-              Remove
-            </button>
-          )}
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#21262d] rounded-lg transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              if (text.trim()) {
-                onSave(text.trim());
-                onClose();
-              }
-            }}
-            disabled={!text.trim()}
-            className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-1"
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            Save
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // Main Component
 export default function CodeforcesFilter() {
   // State
@@ -367,10 +278,6 @@ export default function CodeforcesFilter() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [refreshingUsers, setRefreshingUsers] = useState(false);
-  
-  // Quota state - single quota
-  const [quota, setQuota] = useState<Quota | null>(null);
-  const [quotaModalOpen, setQuotaModalOpen] = useState(false);
   
   // Resizable sidebar
   const { sidebarWidth, sidebarRef, startResizing, isResizing } = useResizableSidebar(280, 420, 340);
@@ -425,11 +332,6 @@ export default function CodeforcesFilter() {
         solvedProblems: new Set(u.solvedProblems || [])
       })));
     }
-
-    const savedQuota = localStorage.getItem('cf-quota');
-    if (savedQuota) {
-      setQuota(JSON.parse(savedQuota));
-    }
   }, []);
 
   // Save data
@@ -450,14 +352,6 @@ export default function CodeforcesFilter() {
     localStorage.setItem('cf-users', JSON.stringify(usersToSave));
   }, [trackedUsers]);
 
-  useEffect(() => {
-    if (quota) {
-      localStorage.setItem('cf-quota', JSON.stringify(quota));
-    } else {
-      localStorage.removeItem('cf-quota');
-    }
-  }, [quota]);
-
   // Fetch problems with caching
   useEffect(() => {
     const fetchData = async () => {
@@ -465,8 +359,8 @@ export default function CodeforcesFilter() {
         setLoading(true);
         
         // Check cache first
-        const cachedData = localStorage.getItem('cf-problems-cache-v2');
-        const cacheTime = localStorage.getItem('cf-problems-cache-v2-time');
+        const cachedData = localStorage.getItem('cf-problems-cache');
+        const cacheTime = localStorage.getItem('cf-problems-cache-time');
         const now = Date.now();
         
         if (cachedData && cacheTime && now - parseInt(cacheTime) < 30 * 60 * 1000) {
@@ -479,31 +373,22 @@ export default function CodeforcesFilter() {
         }
         
         // Fetch fresh data
-      const [problemsRes, contestsRes, gymContestsRes] = await Promise.all([
-        axios.get('https://codeforces.com/api/problemset.problems'),
-        axios.get('https://codeforces.com/api/contest.list'),
-        axios.get('https://codeforces.com/api/contest.list?gym=true')
-      ]);
-              const problemData = problemsRes.data.result.problems;
+        const [problemsRes, contestsRes] = await Promise.all([
+          axios.get('https://codeforces.com/api/problemset.problems'),
+          axios.get('https://codeforces.com/api/contest.list')
+        ]);
+        
+        const problemData = problemsRes.data.result.problems;
         const problemStats = problemsRes.data.result.problemStatistics;
         const contests = contestsRes.data.result;
-        const gymContests = gymContestsRes.data.result;
         
-        // FIXED: Create maps BEFORE using them
         const statsMap = new Map();
         problemStats.forEach((stat: any) => {
           statsMap.set(`${stat.contestId}-${stat.index}`, stat.solvedCount);
         });
         
-        const contestMap = new Map();  // ← NOW declared BEFORE use
+        const contestMap = new Map();
         contests.forEach((contest: any) => {
-          contestMap.set(contest.id, {
-            name: contest.name,
-            startTimeSeconds: contest.startTimeSeconds,
-          });
-        });
-        
-        gymContests.forEach((contest: any) => {  // ← NOW used AFTER declaration
           contestMap.set(contest.id, {
             name: contest.name,
             startTimeSeconds: contest.startTimeSeconds,
@@ -526,8 +411,8 @@ export default function CodeforcesFilter() {
         );
         
         // Cache the data
-        localStorage.setItem('cf-problems-cache-v2', JSON.stringify(enrichedProblems));
-        localStorage.setItem('cf-problems-cache-v2-time', now.toString());
+        localStorage.setItem('cf-problems-cache', JSON.stringify(enrichedProblems));
+        localStorage.setItem('cf-problems-cache-time', now.toString());
         
         setProblems(enrichedProblems);
         setFilteredProblems(enrichedProblems);
@@ -646,13 +531,11 @@ export default function CodeforcesFilter() {
       });
     }
     
-    // Rating filter - include unrated (0) as valid when filter is set
     if (filters.ratingFrom !== '' || filters.ratingTo !== '') {
       result = result.filter(p => {
-        const rating = p.rating || 0;
-        const from = filters.ratingFrom === '' ? 0 : filters.ratingFrom as number;
-        const to = filters.ratingTo === '' ? 3500 : filters.ratingTo as number;
-        return rating >= from && rating <= to;
+        if (!p.rating) return false;
+        return (filters.ratingFrom === '' || p.rating >= filters.ratingFrom) && 
+               (filters.ratingTo === '' || p.rating <= filters.ratingTo);
       });
     }
     
@@ -680,7 +563,7 @@ export default function CodeforcesFilter() {
       );
     }
     
-    // Status filter
+    // Status filter - FIXED
     if (filters.status !== 'all' && trackedUsers.length > 0) {
       result = result.filter(p => {
         const key = `${p.contestId}-${p.index}`;
@@ -802,19 +685,6 @@ export default function CodeforcesFilter() {
     });
   };
 
-  // Quota functions
-  const saveQuota = (text: string) => {
-    setQuota({ text });
-  };
-
-  const deleteQuota = () => {
-    setQuota(null);
-  };
-
-  const openQuotaModal = () => {
-    setQuotaModalOpen(true);
-  };
-
   // Get active filter count
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -892,15 +762,6 @@ export default function CodeforcesFilter() {
 
   return (
     <div className="h-screen bg-[#0d1117] flex flex-col overflow-hidden">
-      {/* Quota Modal */}
-      <QuotaModal
-        isOpen={quotaModalOpen}
-        onClose={() => setQuotaModalOpen(false)}
-        quota={quota}
-        onSave={saveQuota}
-        onDelete={quota ? deleteQuota : undefined}
-      />
-
       {/* Navbar */}
       <nav className="h-14 bg-[#161b22] border-b border-[#30363d] flex items-center justify-between px-4 flex-shrink-0 z-50">
         <div className="flex items-center gap-3">
@@ -916,42 +777,10 @@ export default function CodeforcesFilter() {
           >
             <Menu className="w-5 h-5 text-gray-300" />
           </button>
-          
-          {/* Clickable Title */}
-          <a 
-            href="/" 
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.reload();
-            }}
-          >
-            <Filter className="w-5 h-5 text-blue-400" />
-            <span className="font-semibold text-lg text-white hidden sm:inline">CF Problems Filter</span>
-          </a>
-        </div>
-        
-        {/* Middle Section - Single Quota */}
-        <div className="hidden md:flex items-center justify-center flex-1 px-4">
-          <button
-            onClick={openQuotaModal}
-            className={`
-              group flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all duration-200
-              ${quota?.text 
-                ? 'bg-[#3d2817] border-[#d4a72c] text-[#d4a72c] hover:bg-[#4a321c]' 
-                : 'bg-[#1c2128] border-[#30363d] text-gray-400 hover:border-gray-500 hover:text-gray-300'
-              }
-            `}
-            title={quota?.text || 'Click to set your quota'}
-          >
-            <Target className={`w-4 h-4 ${quota?.text ? 'text-[#d4a72c]' : 'text-gray-400'}`} />
-            <span className="text-sm font-medium truncate max-w-[300px]">
-              {quota?.text || 'Set your quota...'}
-            </span>
-            {!quota?.text && (
-              <Edit3 className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center font-bold text-white text-sm">CF</div>
+            <span className="font-semibold text-lg text-white hidden sm:inline">Filter</span>
+          </div>
         </div>
         
         <div className="flex items-center gap-2">
@@ -998,25 +827,6 @@ export default function CodeforcesFilter() {
           </a>
         </div>
       </nav>
-
-      {/* Mobile Quota Bar */}
-      <div className="md:hidden bg-[#0d1117] border-b border-[#30363d] px-4 py-2 flex items-center justify-center">
-        <button
-          onClick={openQuotaModal}
-          className={`
-            flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all
-            ${quota?.text 
-              ? 'bg-[#3d2817] border-[#d4a72c] text-[#d4a72c]' 
-              : 'bg-[#1c2128] border-[#30363d] text-gray-400'
-            }
-          `}
-        >
-          <Target className={`w-4 h-4 ${quota?.text ? 'text-[#d4a72c]' : 'text-gray-400'}`} />
-          <span className="text-sm font-medium truncate max-w-[250px]">
-            {quota?.text || 'Set your quota...'}
-          </span>
-        </button>
-      </div>
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />}
@@ -1109,31 +919,27 @@ export default function CodeforcesFilter() {
                   options={RATING_OPTIONS}
                 />
 
-                {/* Solved Count Range - Fixed UI */}
+                {/* Solved Count Range */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Solved Count</label>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 relative">
-                      <input
-                        type="number"
-                        value={filters.solvedFrom}
-                        onChange={(e) => setFilters({ ...filters, solvedFrom: e.target.value === '' ? '' : Number(e.target.value) })}
-                        placeholder="min"
-                        min="0"
-                        className="w-full px-3 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-500 text-center"
-                      />
-                    </div>
+                    <input
+                      type="number"
+                      value={filters.solvedFrom}
+                      onChange={(e) => setFilters({ ...filters, solvedFrom: e.target.value === '' ? '' : Number(e.target.value) })}
+                      placeholder="min"
+                      min="0"
+                      className="flex-1 px-3 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-500 text-center"
+                    />
                     <span className="text-gray-500 font-bold text-lg">—</span>
-                    <div className="flex-1 relative">
-                      <input
-                        type="number"
-                        value={filters.solvedTo}
-                        onChange={(e) => setFilters({ ...filters, solvedTo: e.target.value === '' ? '' : Number(e.target.value) })}
-                        placeholder="max"
-                        min="0"
-                        className="w-full px-3 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-500 text-center"
-                      />
-                    </div>
+                    <input
+                      type="number"
+                      value={filters.solvedTo}
+                      onChange={(e) => setFilters({ ...filters, solvedTo: e.target.value === '' ? '' : Number(e.target.value) })}
+                      placeholder="max"
+                      min="0"
+                      className="flex-1 px-3 py-2.5 bg-[#0d1117] border border-[#30363d] rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-500 text-center"
+                    />
                   </div>
                 </div>
               </div>
@@ -1388,69 +1194,56 @@ export default function CodeforcesFilter() {
         </main>
       </div>
 
-      {/* Footer with Pagination - Centered */}
-      <footer className="h-12 bg-[#161b22] border-t border-[#30363d] flex items-center px-4 flex-shrink-0">
-        {/* Left Section */}
-        <div className="flex items-center gap-4 text-xs text-gray-500 w-[200px]">
+      {/* Footer with Pagination */}
+      <footer className="h-12 bg-[#161b22] border-t border-[#30363d] flex items-center justify-between px-4 flex-shrink-0">
+        <div className="flex items-center gap-4 text-xs text-gray-500">
           <span className="font-medium text-gray-400">CF Filter</span>
           <span className="hidden sm:inline">|</span>
           <span className="hidden sm:inline">Powered by Codeforces API</span>
         </div>
         
-        {/* Center Section - Pagination */}
-        <div className="flex-1 flex items-center justify-center">
-          {totalPages > 1 && (
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="px-2 py-1.5 hover:bg-[#21262d] rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-300 flex items-center gap-1 text-sm"
-              >
-                <ChevronLeft className="w-4 h-4" /><span className="hidden sm:inline">Prev</span>
-              </button>
+        {/* Pagination in Footer */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-1">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-2 py-1.5 hover:bg-[#21262d] rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-300 flex items-center gap-1 text-sm"
+            >
+              <ChevronLeft className="w-4 h-4" /><span className="hidden sm:inline">Prev</span>
+            </button>
+            
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) pageNum = i + 1;
+              else if (currentPage <= 3) pageNum = i + 1;
+              else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+              else pageNum = currentPage - 2 + i;
               
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) pageNum = i + 1;
-                else if (currentPage <= 3) pageNum = i + 1;
-                else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-                else pageNum = currentPage - 2 + i;
-                
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === pageNum ? 'bg-blue-500 text-white' : 'hover:bg-[#21262d] text-gray-400'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-              
-              <button
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                className="px-2 py-1.5 hover:bg-[#21262d] rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-300 flex items-center gap-1 text-sm"
-              >
-                <span className="hidden sm:inline">Next</span><ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === pageNum ? 'bg-blue-500 text-white' : 'hover:bg-[#21262d] text-gray-400'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            
+            <button
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="px-2 py-1.5 hover:bg-[#21262d] rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-300 flex items-center gap-1 text-sm"
+            >
+              <span className="hidden sm:inline">Next</span><ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
         
-        {/* Right Section */}
-        <div className="flex items-center justify-end gap-3 w-[200px]">
-          <a 
-            href="https://www.linkedin.com/in/m0stafa-kamal/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-400 transition-colors"
-          >
-            <Linkedin className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">LinkedIn</span>
-          </a>
+        <div className="flex items-center gap-3">
           <a href="https://codeforces.com/profile/m0stafa" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-white transition-colors">@m0stafa</a>
         </div>
       </footer>
